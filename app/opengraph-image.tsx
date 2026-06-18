@@ -7,7 +7,7 @@ import { ImageResponse } from "next/og";
  * 1200x630 is the canonical OG size and what Facebook, LinkedIn, X,
  * Slack, Discord, WhatsApp and iMessage all preview at.
  */
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const contentType = "image/png";
 export const size = { width: 1200, height: 630 };
 export const alt = "Lexoni.ai - The GCC Legal Operating System";

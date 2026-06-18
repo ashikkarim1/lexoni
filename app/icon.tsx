@@ -5,7 +5,7 @@ import { ImageResponse } from "next/og";
  * to PNG so browsers without SVG-favicon support still see the brand mark.
  * Next.js routes this at /icon.
  */
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const contentType = "image/png";
 export const size = { width: 32, height: 32 };
 

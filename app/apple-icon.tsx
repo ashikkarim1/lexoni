@@ -3,7 +3,7 @@ import { ImageResponse } from "next/og";
 /**
  * Apple touch icon. Same mark, sized for iOS home-screen.
  */
-export const runtime = "edge";
+export const runtime = "nodejs";
 export const contentType = "image/png";
 export const size = { width: 180, height: 180 };
 
