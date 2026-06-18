@@ -41,21 +41,30 @@ function openBypass(): boolean {
 }
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  if (openBypass()) return NextResponse.next();
+  // Middleware MUST NOT throw — an uncaught exception in middleware takes
+  // down every request, including public marketing pages, and the user
+  // sees MIDDLEWARE_INVOCATION_FAILED. Wrap the whole body. Worst-case
+  // we let the request through and let the page-level guards handle it.
+  try {
+    const { pathname } = req.nextUrl;
+    if (openBypass()) return NextResponse.next();
 
-  if (!PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    if (!PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+      return NextResponse.next();
+    }
+
+    const cookie = req.cookies.get(COOKIE_NAME)?.value;
+    const unpacked = await unpackSessionCookie(cookie).catch(() => null);
+    if (unpacked) return NextResponse.next();
+
+    const url = req.nextUrl.clone();
+    url.pathname = "/signin";
+    url.searchParams.set("next", pathname);
+    return NextResponse.redirect(url);
+  } catch (err) {
+    console.error("[middleware] unexpected error", err);
     return NextResponse.next();
   }
-
-  const cookie = req.cookies.get(COOKIE_NAME)?.value;
-  const unpacked = await unpackSessionCookie(cookie);
-  if (unpacked) return NextResponse.next();
-
-  const url = req.nextUrl.clone();
-  url.pathname = "/signin";
-  url.searchParams.set("next", pathname);
-  return NextResponse.redirect(url);
 }
 
 export const config = {
