@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ──────────────────────────────────────────────────────────────────────
+   CSS variables — every surface and brand colour comes from tokens.
+   Components must consume these (`var(--ink)`) or the Tailwind classes
+   that map to them (`text-ink`), never raw hex.
+   ────────────────────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    --bg:       #F8FAFC;
+    --surface:  #FFFFFF;
+    --raised:   #FFFFFF;
+    --ink:      #0F172A;
+    --muted:    #64748B;
+    --line:     #E2E8F0;
+    --line-strong: #CBD5E1;
+    --brand:    #2546E3;
+    --focus:    #3B62F2;
+    --ring:     0 0 0 4px #DBE5FE;
+  }
+  .dark {
+    --bg:       #0B1220;
+    --surface:  #0F172A;
+    --raised:   #1E293B;
+    --ink:      #E2E8F0;
+    --muted:    #94A3B8;
+    --line:     #1E293B;
+    --line-strong: #334155;
+  }
+  html, body { background: var(--bg); color: var(--ink); }
+  body {
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  [dir="rtl"] body { font-family: 'IBM Plex Sans Arabic', Inter, sans-serif; }
+
+  /* Global focus ring — every interactive element. */
+  :where(button, a, [role="button"], [role="link"], input, select, textarea, [tabindex]):focus-visible {
+    outline: none;
+    box-shadow: var(--ring);
+    border-radius: 8px;
+  }
+
+  /* Selection styling — feels considered. */
+  ::selection { background: var(--brand); color: #fff; }
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Component utility classes — semantic, composable, no raw colour or
+   spacing literals. Pages compose these instead of redefining surfaces.
+   ────────────────────────────────────────────────────────────────────── */
+@layer components {
+  /* Surfaces */
+  .card        { @apply bg-surface dark:bg-neutral-800 border border-line dark:border-neutral-700 rounded-xl shadow-sm; }
+  .card-raised { @apply bg-surface dark:bg-neutral-800 border border-line dark:border-neutral-700 rounded-xl shadow-md; }
+  .panel       { @apply bg-surface dark:bg-neutral-800 border border-line dark:border-neutral-700 rounded-lg; }
+
+  /* Buttons — explicit hierarchy (primary / secondary / ghost / danger). */
+  .btn      { @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 h-9 text-body-sm font-medium transition-[background-color,color,border-color,box-shadow] duration-150 disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary   { @apply btn bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800; }
+  .btn-secondary { @apply btn bg-surface text-ink border border-line hover:border-neutral-300 hover:bg-neutral-50; }
+  .btn-ghost     { @apply btn text-ink hover:bg-neutral-100 dark:hover:bg-neutral-700; }
+  .btn-danger    { @apply btn bg-danger-600 text-white hover:bg-danger-700; }
+  .btn-sm        { @apply h-7 px-2.5 text-caption rounded-md; }
+  .btn-lg        { @apply h-11 px-5 text-body; }
+
+  /* Inputs */
+  .input    { @apply w-full h-9 rounded-lg border border-line bg-surface px-3 text-body-sm placeholder:text-muted focus-visible:border-primary-500 transition-colors; }
+  .textarea { @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-body-sm placeholder:text-muted focus-visible:border-primary-500 transition-colors resize-y; }
+
+  /* Badges + status chips */
+  .badge        { @apply inline-flex items-center gap-1 rounded-md px-2 h-5 text-caption font-medium; }
+  .chip-success { @apply badge bg-success-50 text-success-700 ring-1 ring-success-200/60 ring-inset; }
+  .chip-warning { @apply badge bg-warning-50 text-warning-700 ring-1 ring-warning-200/60 ring-inset; }
+  .chip-danger  { @apply badge bg-danger-50  text-danger-700  ring-1 ring-danger-200/60  ring-inset; }
+  .chip-info    { @apply badge bg-info-50    text-info-700    ring-1 ring-info-200/60    ring-inset; }
+  .chip-neutral { @apply badge bg-neutral-100 text-neutral-700 ring-1 ring-neutral-200/80 ring-inset; }
+
+  /* Section eyebrow */
+  .sec-title { @apply text-caption font-semibold text-muted uppercase tracking-wider; }
+
+  /* Tables */
+  .tbl                 { @apply w-full text-body-sm; }
+  .tbl thead th        { @apply text-start text-caption font-semibold text-muted uppercase tracking-wider px-4 h-10 border-b border-line bg-neutral-50/60; }
+  .tbl tbody td        { @apply px-4 py-3 border-b border-line/70 align-middle; }
+  .tbl tbody tr:hover  { @apply bg-neutral-50/60; }
+
+  /* Sidebar items */
+  .nav-item        { @apply flex items-center gap-2.5 rounded-md px-3 h-8 text-body-sm text-neutral-300 hover:bg-neutral-700 hover:text-white transition-colors; }
+  .nav-item-active { @apply bg-neutral-700 text-white; }
+  .nav-section     { @apply text-caption font-semibold uppercase tracking-wider text-neutral-400 px-3 mt-5 mb-1; }
+
+  /* Skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, var(--line) 0%, color-mix(in srgb, var(--line) 60%, white 40%) 50%, var(--line) 100%);
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded-md;
+  }
+
+  /* Modal / drawer surfaces */
+  .scrim { @apply fixed inset-0 z-50 bg-neutral-900/40 backdrop-blur-[2px] animate-fade-in; }
+  .modal { @apply card-raised w-full max-w-lg animate-slide-up; }
+
+  /* Heading shortcuts kept as aliases for backward compat — prefer text-h1/h2/h3. */
+  .h1 { @apply text-h1; }
+  .h2 { @apply text-h2; }
+
+  /* Rendered markdown body (engagement letters, AI drafts, etc). */
+  .prose-render { @apply text-body leading-relaxed text-ink; }
+  .prose-render h1 { @apply text-h1 mt-6 mb-3; }
+  .prose-render h2 { @apply text-h2 mt-5 mb-2; }
+  .prose-render h3 { @apply text-h3 mt-4 mb-2; }
+  .prose-render h4 { @apply text-h4 mt-4 mb-2; }
+  .prose-render p  { @apply mb-3; }
+  .prose-render ul { @apply list-disc ps-6 mb-3; }
+  .prose-render ol { @apply list-decimal ps-6 mb-3; }
+  .prose-render li { @apply mb-1; }
+  .prose-render a  { @apply text-primary-700 underline; }
+  .prose-render code { @apply font-mono text-body-sm bg-neutral-100 rounded px-1 py-0.5; }
+  .prose-render pre { @apply font-mono text-body-sm bg-neutral-50 border border-line rounded-lg p-3 my-3 overflow-x-auto; }
+  .prose-render pre code { @apply bg-transparent p-0; }
+  .prose-render blockquote { @apply ps-3 border-s-2 border-primary-300 text-muted my-3; }
+  .prose-render hr { @apply border-line my-6; }
+  .prose-render table { @apply w-full border-collapse my-4 text-body-sm; }
+  .prose-render th, .prose-render td { @apply border border-line px-3 py-2; }
+  .prose-render strong { @apply font-semibold; }
+  .prose-render em { @apply italic; }
+
+  /* Mammoth-rendered DOCX HTML. Bare lawyer prose with sensible defaults. */
+  .docx-render { @apply text-body leading-relaxed; }
+  .docx-render h1 { @apply text-h1 mt-6 mb-3; }
+  .docx-render h2 { @apply text-h2 mt-5 mb-2; }
+  .docx-render h3 { @apply text-h3 mt-4 mb-2; }
+  .docx-render p  { @apply mb-3; }
+  .docx-render ul { @apply list-disc ps-6 mb-3; }
+  .docx-render ol { @apply list-decimal ps-6 mb-3; }
+  .docx-render li { @apply mb-1; }
+  .docx-render table { @apply w-full border-collapse my-4; }
+  .docx-render th, .docx-render td { @apply border border-line px-3 py-2 text-body-sm; }
+  .docx-render strong { @apply font-semibold; }
+  .docx-render em { @apply italic; }
+}

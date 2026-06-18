@@ -1,0 +1,36 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+
+  "//": "Lexoni.ai on Vercel. Region: fra1 (Frankfurt) gives the lowest GCC latency on Pro; for Hobby we accept the global default. Cron jobs run as scheduled functions, gated by CRON_SECRET to prevent unauthorised invocation.",
+
+  "regions": ["fra1"],
+
+  "functions": {
+    "app/api/auth/**/*": { "maxDuration": 10 },
+    "app/api/feedback/**/*": { "maxDuration": 5 },
+    "app/api/contact/**/*": { "maxDuration": 5 },
+    "app/api/security/challenge/**/*": { "maxDuration": 3 },
+    "app/api/memory/**/*": { "maxDuration": 60 },
+    "app/api/copilot/**/*": { "maxDuration": 60 },
+    "app/api/regulatory/**/*": { "maxDuration": 60 },
+    "app/api/cron/**/*": { "maxDuration": 60 }
+  },
+
+  "crons": [
+    {
+      "//": "Reap expired magic-link + password-reset + activation tokens. Cheap, runs nightly at 03:00 UTC.",
+      "path": "/api/cron/reap-tokens",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "//": "Compliance reconcile: mark overdue filings as overdue every morning at 06:30 UTC (10:30 Dubai).",
+      "path": "/api/cron/compliance-reconcile",
+      "schedule": "30 6 * * *"
+    },
+    {
+      "//": "Weekly knowledge re-index. Sundays 04:00 UTC.",
+      "path": "/api/cron/reindex-knowledge",
+      "schedule": "0 4 * * 0"
+    }
+  ]
+}
