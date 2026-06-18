@@ -20,7 +20,9 @@ const nextConfig = {
   experimental: {
     serverActions: { bodySizeLimit: "10mb" },
     // Per-icon imports tree-shake lucide so we don't ship the whole library.
-    optimizePackageImports: ["lucide-react", "date-fns", "@anthropic-ai/sdk"],
+    // @anthropic-ai/sdk REMOVED from this list - on Vercel it was leaking
+    // node-only globals (__dirname) into the homepage bundle.
+    optimizePackageImports: ["lucide-react", "date-fns"],
   },
 
   // ---------------------------------------------------------------------------
