@@ -16,7 +16,9 @@
  * locked.
  */
 import { NextRequest, NextResponse } from "next/server";
-import { COOKIE_NAME, unpackSessionCookie } from "@/lib/auth/cookie";
+// Relative import (not @/lib/...): Vercel's Edge bundler trips on the
+// path alias when collecting middleware's module graph.
+import { COOKIE_NAME, unpackSessionCookie } from "./lib/auth/cookie";
 
 const PROTECTED_PREFIXES = [
   "/desk", "/matters", "/firm-dashboard", "/conflicts",
