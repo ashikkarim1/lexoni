@@ -19,14 +19,23 @@
  * Node runtimes. No node:* imports.
  */
 
-import { authSecret } from "@/lib/env";
-
 const MAX_AGE_S = 5 * 60;
 const MIN_AGE_S = 2;          // human reaction floor
 const CLOCK_SKEW_S = 5;
 
+const DEV_FALLBACK = "lexoni-dev-secret-rotate-me-in-production";
+
+/**
+ * Inlined for Edge-runtime compatibility (see lib/auth/cookie.ts). Same
+ * behaviour as lib/env.authSecret: missing-in-prod is fatal.
+ */
 function secret(): string {
-  return authSecret();
+  const v = process.env.AUTH_SECRET;
+  if (v && v.length >= 16) return v;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("AUTH_SECRET is not set in production.");
+  }
+  return DEV_FALLBACK;
 }
 
 async function hmacSha256(payload: string): Promise<string> {

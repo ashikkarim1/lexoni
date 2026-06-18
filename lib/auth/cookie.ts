@@ -11,13 +11,24 @@
  * → null session.
  */
 
-import { authSecret } from "@/lib/env";
-
 export const COOKIE_NAME = "lexoni_session";
 const COOKIE_MAX_AGE_S = 30 * 24 * 60 * 60;
 
+const DEV_FALLBACK = "lexoni-dev-secret-rotate-me-in-production";
+
+/**
+ * The HMAC key for session cookies. Inlined here (rather than imported from
+ * lib/env) so this module is self-contained for the Edge runtime — Vercel's
+ * middleware analyser rejects deep import chains across path aliases. Same
+ * production behaviour as `authSecret()`: missing-in-prod is fatal.
+ */
 function secret(): string {
-  return authSecret();
+  const v = process.env.AUTH_SECRET;
+  if (v && v.length >= 16) return v;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("AUTH_SECRET is not set in production. Generate one with `openssl rand -base64 32` and set it in Vercel.");
+  }
+  return DEV_FALLBACK;
 }
 
 async function hmacSha256(payload: string): Promise<string> {

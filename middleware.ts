@@ -17,7 +17,6 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { COOKIE_NAME, unpackSessionCookie } from "@/lib/auth/cookie";
-import { isOpenBypass } from "@/lib/env";
 
 const PROTECTED_PREFIXES = [
   "/desk", "/matters", "/firm-dashboard", "/conflicts",
@@ -28,11 +27,20 @@ const PROTECTED_PREFIXES = [
   "/documents", "/precedents", "/copilot", "/memory", "/growth", "/my",
 ];
 
+/**
+ * Inlined for the Edge runtime (Vercel's middleware analyser rejects deep
+ * imports across path aliases). Same behaviour as lib/env.isOpenBypass:
+ * LEXONI_PUBLIC=1 is silently ignored in production so we can never ship
+ * with the dashboard accidentally exposed.
+ */
+function openBypass(): boolean {
+  if (process.env.NODE_ENV === "production") return false;
+  return process.env.LEXONI_PUBLIC === "1";
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  // isOpenBypass() returns false in production regardless of env, so the
-  // dashboard cannot be accidentally opened to the public internet.
-  if (isOpenBypass()) return NextResponse.next();
+  if (openBypass()) return NextResponse.next();
 
   if (!PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     return NextResponse.next();
