@@ -1,16 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "regions": ["fra1"],
-  "functions": {
-    "app/api/auth/**/route.ts": { "maxDuration": 10 },
-    "app/api/feedback/**/route.ts": { "maxDuration": 5 },
-    "app/api/contact/**/route.ts": { "maxDuration": 5 },
-    "app/api/security/challenge/**/route.ts": { "maxDuration": 3 },
-    "app/api/memory/**/route.ts": { "maxDuration": 60 },
-    "app/api/copilot/**/route.ts": { "maxDuration": 60 },
-    "app/api/regulatory/**/route.ts": { "maxDuration": 60 },
-    "app/api/cron/**/route.ts": { "maxDuration": 60 }
-  },
   "crons": [
     {
       "path": "/api/cron/reap-tokens",

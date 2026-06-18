@@ -4,6 +4,7 @@ import { askMemory } from "@/lib/ai/memory";
 import { writeAudit } from "@/lib/data/audit";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const session = await getSession();
