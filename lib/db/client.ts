@@ -25,16 +25,48 @@ import * as schema from "./schema";
 
 type DB = PostgresJsDatabase<typeof schema>;
 
-const url = process.env.DATABASE_URL;
+const rawUrl = process.env.DATABASE_URL;
+
+/**
+ * Validate the connection string before handing it to postgres().
+ * A malformed value (whitespace, missing scheme, accidental newline)
+ * would otherwise throw ERR_INVALID_URL at module load — which crashes
+ * the Vercel build during page-data collection. Falling back to null
+ * keeps the app in mock-mode rather than taking down the deploy.
+ */
+function safeUrl(): string | null {
+  if (!rawUrl) return null;
+  const trimmed = rawUrl.trim();
+  if (!/^postgres(ql)?:\/\//i.test(trimmed)) {
+    if (process.env.NODE_ENV === "production") {
+      console.error("[db] DATABASE_URL is set but does not start with postgres://. Running in mock mode.");
+    }
+    return null;
+  }
+  try {
+    new URL(trimmed); // throws ERR_INVALID_URL on garbage
+    return trimmed;
+  } catch (e) {
+    console.error("[db] DATABASE_URL failed URL parse — running in mock mode.", (e as Error).message);
+    return null;
+  }
+}
+
+const url = safeUrl();
 
 function buildClient() {
   if (!url) return null;
-  return postgres(url, {
-    prepare: false,           // PgBouncer / pooler compatible
-    max: 1,                   // single connection per function instance
-    idle_timeout: 20,         // free up pool slots quickly
-    connect_timeout: 10,      // fail fast on networking issues
-  });
+  try {
+    return postgres(url, {
+      prepare: false,           // PgBouncer / pooler compatible
+      max: 1,                   // single connection per function instance
+      idle_timeout: 20,         // free up pool slots quickly
+      connect_timeout: 10,      // fail fast on networking issues
+    });
+  } catch (e) {
+    console.error("[db] postgres() init failed — running in mock mode.", (e as Error).message);
+    return null;
+  }
 }
 
 // Reuse one connection across hot-reloads in dev. In prod each function
